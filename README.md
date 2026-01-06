@@ -1,5 +1,7 @@
 # Listening Data (Spotify)
 
+Récupérer des données et exporter les métadonnées d'écoute auprès de Spotify, notamment pour faire un *backup* du compte (en particulier des *playlists*).
+
 - [Listening Data (Spotify)](#listening-data-spotify)
   - [Installation](#installation)
   - [Lancer le projet](#lancer-le-projet)
