@@ -1,0 +1,6 @@
+[spotify]
+base_url_spotify = "https://api.spotify.com/v1/"
+client_id = 'your client id'
+client_secret = 'your secret id'
+redirect_uri = 'your uri (http)'
+redirect_uri_secure = 'your uri (https)'
