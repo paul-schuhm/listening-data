@@ -4,10 +4,7 @@ Récupérer des données et exporter les métadonnées d'écoute auprès de Spot
 
 - [Listening Data (Spotify)](#listening-data-spotify)
   - [Installation](#installation)
-  - [Lancer le projet](#lancer-le-projet)
-    - [Option 1 : CLI](#option-1--cli)
-    - [Option 2 : Avec un serveur web local (HTTP)](#option-2--avec-un-serveur-web-local-http)
-  - [Option 3 : Avec un serveur web local avec une connexion sécurisée (HTTPS)](#option-3--avec-un-serveur-web-local-avec-une-connexion-sécurisée-https)
+  - [Lancer le programme](#lancer-le-programme)
     - [Serveur local HTTPS avec `stunnel`, comment cela fonctionne ?](#serveur-local-https-avec-stunnel-comment-cela-fonctionne-)
     - [Précautions](#précautions)
   - [Références utiles](#références-utiles)
@@ -22,44 +19,11 @@ Récupérer des données et exporter les métadonnées d'écoute auprès de Spot
 
 2. **Renseignez-y** les credentials et données de votre application cliente Spotify.
 
-## Lancer le projet
-
-
-### Option 1 : CLI
+## Lancer le programme
 
 ~~~bash
 php index.php
 ~~~
-
-
-### Option 2 : Avec un serveur web local (HTTP)
-
-> Pour l'URL de redirection de Spotify,[on peut utiliser en local une URL non sécurisée](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri)
-
-~~~bash
-php -S localhost:5005 -t public
-~~~
-
-## Option 3 : Avec un serveur web local avec une connexion sécurisée (HTTPS)
-
-> Prérequis : installer mkcert, stunnel, installer un certificat authority CA local et générer un certificat pour le domaine localhost `localhost-bundle.pem`.
-
-Pour cela, on utilise [stunnel](https://www.stunnel.org/) comme proxy TLS afin de rediriger la connexion vers le serveur web intégré de PHP :
-
-1. Lancer le serveur intégré de PHP :
-
-    ~~~bash
-    php -S localhost:5005 -t public
-    ~~~
-
-2. Lancer `stunnel` pour le support TLS :
-
-    ~~~bash
-    sudo stunnel3 -f -d 443 -r 5005 -p ~/localhost-bundle.pem
-    ~~~
-
-    > Le fichier `localhost-bundle.pem` a été généré précédemment. C'est la concaténation du certificat et de la clé privée (crée avec mkcert), utilisée par stunnel. Voir [la doc](https://github.com/FiloSottile/mkcert) ou [ce bon guide vidéo](https://www.youtube.com/watch?v=sDAX1uQzM8Y).
-3. Se rendre à l'url `https://localhost` (sans mentionner le port, il est implicite, c'est le port 443 car http*s* !).
 
 ### Serveur local HTTPS avec `stunnel`, comment cela fonctionne ?
 
