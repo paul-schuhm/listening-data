@@ -78,8 +78,8 @@ Si un attaquant récupère clé privée, il peut fabriquer des **certificats sig
 
 ## Références utiles
 
-- [Spotify for Developers : Web API](https://developer.spotify.com/documentation/web-api)
-- [Spotify for Developers : Authorization Code Flow](https://developer.spotify.com/documentation/web-api/tutorials/code-flow)
+- [Spotify for Developers : Web API](https://developer.spotify.com/documentation/web-api), la doc de l'API de Spotify ;
+- [Spotify for Developers : Authorization Code Flow](https://developer.spotify.com/documentation/web-api/tutorials/code-flow), le workflow (protocole OAuth 2) pour obtenir un access token lié à un utilisateur authentifié ;
 - [Spotify for Developers : Redirect URIs](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri), sur la politique des URI de redirection définie par Spotify ;
-- [mkcert](https://github.com/FiloSottile/mkcert), mkcert is a simple tool for making **locally-trusted development certificates**. It requires no configuration. Pour nous permettre d'enregistrer une URL de redirection (cf protocole OAuth) locale en HTTPS auprès de Spotify.
-- [How to use HTTPS on localhost with PHP built in web server (and run WordPress)](https://www.youtube.com/watch?v=sDAX1uQzM8Y), vidéo YouTube qui explique comment utiliser [mkcert (CA local)](https://github.com/FiloSottile/mkcert) et [stunnel](https://www.stunnel.org/) pour utiliser le serveur local de PHP avec un certificat TLS (pas nativement supporté, d'où l'usage de stunnel)
+- [mkcert](https://github.com/FiloSottile/mkcert), mkcert is a simple tool for making **locally-trusted development certificates**. It requires no configuration. Pour nous permettre d'enregistrer une URL de redirection (cf protocole OAuth) locale en HTTPS auprès de Spotify ;
+- [How to use HTTPS on localhost with PHP built in web server (and run WordPress)](https://www.youtube.com/watch?v=sDAX1uQzM8Y), vidéo YouTube qui explique comment utiliser [mkcert (CA local)](https://github.com/FiloSottile/mkcert) et [stunnel](https://www.stunnel.org/) pour utiliser le serveur local de PHP avec un certificat TLS (pas nativement supporté, d'où l'usage de `stunnel`).
