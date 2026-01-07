@@ -6,11 +6,12 @@ define('DEBUG_MODE', true);
 $config = parse_ini_file(__DIR__ . '/config.ini', true)['spotify'];
 
 if ($config == false) {
-    throw new Exception("Impossible de charger les données pour se connecter. Merci de créer le fichier config.ini avec les clé/valeurs adéquates.");
+    throw new Exception("Impossible de charger les données pour se connecter. Créer le fichier 'config.ini' avec les clé/valeurs adéquates (voir le fichier config.ini.dist).");
 }
 
 define('CLIENT_ID', $config['client_id']);
 define('CLIENT_SECRET', $config['client_secret']);
-define('BASE_URL_SPOTIFY', $config['base_url_spotify']);
+define('ACCESS_TOKEN_URL_SPOTIFY', $config['access_token_url']);
+define('AUTHORIZE_URL', $config['authorize_url']);
 define('REDIRECT_URI', $config['redirect_uri']);
 define('REDIRECT_URI_SECURE', $config['redirect_uri_secure']);

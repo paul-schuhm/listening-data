@@ -27,8 +27,7 @@ $params = array(
     'response_type' => 'code',
 );
 
-$auth_url = BASE_URL_SPOTIFY . '?' . http_build_query($params);
-$auth_url = 'https://accounts.spotify.com/authorize?' . http_build_query($params);
+$auth_url = AUTHORIZE_URL . '?' . http_build_query($params);
 
 //Redirection vers la page d'authentification user de Spotify (web form)
 exec("xdg-open '$auth_url' >/dev/null 2>&1");
