@@ -7,26 +7,14 @@
  * @author Paul Schuhmacher
  */
 
-define('DEBUG_MODE', true);
+require_once 'config.php';
+require_once 'func.php';
 
 if (!DEBUG_MODE) {
     set_exception_handler(function (Exception $e) {
         die($e->getMessage());
     });
 }
-
-//Load data and env variables from a local config.ini file placed at the root of the project
- $config = parse_ini_file(__DIR__ . '/config.ini', true)['spotify'];
-
-if ($config == false) {
-    throw new Exception("Impossible de charger les données pour se connecter. Merci de créer le fichier config.ini avec les clé/valeurs adéquates.");
-}
-
-define('CLIENT_ID', $config['client_id']);
-define('CLIENT_SECRET', $config['client_secret']);
-define('BASE_URL_SPOTIFY', $config['base_url_spotify']);
-define('REDIRECT_URI', $config['redirect_uri']);
-define('REDIRECT_URI_SECURE', $config['redirect_uri_secure']);
 
 /*
 Choisir l'une des 2 REDIRECT_URI (secure ou non). URL enregistrées auprès de l'appli Spotify (https://developer.spotify.com/dashboard)
@@ -66,3 +54,7 @@ if ($code != null) {
 
 fclose($connexion);
 fclose($socket);
+
+//Request access token
+$access_token = request_access_token($code);
+dump($access_token);

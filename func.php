@@ -4,11 +4,30 @@
  * Module containing all functions.
  */
 
+require_once 'config.php';
 
 /**
- * Request and return access token
+ * Var_dump $data only in DEBUG_MODE
  *
- * @param string $code Token obtained after user grand client app autorization
+ * @param [type] ...$data
+ * @return void
+ */
+function dump(mixed ...$data): void
+{
+    if (!defined('DEBUG_MODE') || DEBUG_MODE !== true) {
+        return;
+    }
+
+    foreach ($data as $value) {
+        var_dump($value);
+    }
+}
+
+
+/**
+ * Request and return Spotify access token, after authentication
+ *
+ * @param string $code Token obtained after Spotify user has granted authorization to this client app.
  * @return string
  */
 function request_access_token(string $code): string
@@ -17,7 +36,7 @@ function request_access_token(string $code): string
     $data = [
         'grant_type' => '',
         'code' => $code,
-        'redirect_uri' => ''
+        'redirect_uri' => REDIRECT_URI
     ];
 
     $ch = curl_init();
