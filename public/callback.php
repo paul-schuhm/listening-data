@@ -18,6 +18,7 @@ function request_access_token(string $code): string
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_exec($ch);
 }
 
 
