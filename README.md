@@ -72,7 +72,7 @@ Le trafic est *bidirectionnel* et *symétrique*.
 
 Ne pas **rendre publique la clé du CA local** (`localhost-key.pem`) et donc le bundle crée (`localhost-bundle.pem`).
 
-Si un attaquant récupère clé privée, il peut fabriquer des **certificats signés par mon CA local**, donc **immédiatement trustés par mon navigateur** (car j'ai ajouté au trust store navigateur/OS avec `mkcert -install`). Si l'attaquant lance un processus *daemon* sur le port 443, lorsque je vais sur <https://localhost> je dialogue avec *son* processus et non mon service (par exemple, mon serveur web intégré PHP) ! Et mon navigateur n'y verra que du feu car le CA est valide. Alors les cookies, tokens, credentials exposés. Même en local, le navigateur parle bien à *ma machine* mais il ne parle pas forcément à *mon service*.
+Si un attaquant récupère clé privée, il peut fabriquer des **certificats signés par mon CA local**, donc **immédiatement trustés par mon navigateur** (car j'ai ajouté au trust store navigateur/OS avec `mkcert -install`). Si l'attaquant lance un processus *daemon* sur le port 443, lorsque je vais sur <https://localhost> je dialogue avec *son* processus et non mon service (par exemple, mon serveur web intégré PHP) ! Et mon navigateur n'y verra *que du feu* car le CA est valide. Alors les cookies, tokens et credentials se retrouvent exposés et accessibles à l'attaquant. Ainsi, le navigateur parle bien à *ma machine* mais il ne parle pas forcément à *mon service* ! Donc, attention.
 
 > C'est pourquoi on a mis les fichiers crées par mkcert avec perms `600` (acces propriétaire seulement)
 
