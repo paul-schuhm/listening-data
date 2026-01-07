@@ -1,5 +1,16 @@
 <?php
 
+readonly class AccessToken
+{
+    public function __construct(
+        public string $value,
+        public string $type,
+        public string $expires_in,
+        public string $refresh_token,
+    ) {
+    }
+}
+
 /**
  * Module containing all functions.
  */
@@ -28,9 +39,9 @@ function dump(mixed ...$data): void
  * Request and return Spotify access token, after authentication
  *
  * @param string $code Token obtained after Spotify user has granted authorization to this client app.
- * @return string
+ * @return AccessToken
  */
-function request_access_token(string $code): string
+function request_access_token(string $code): AccessToken
 {
 
     /*@see https://developer.spotify.com/documentation/web-api/tutorials/code-flow (section Request an access token)*/
@@ -41,8 +52,6 @@ function request_access_token(string $code): string
     ];
 
     $token = base64_encode(sprintf("%s:%s", CLIENT_ID, CLIENT_SECRET));
-    
-    dump($token);
 
     $ch = curl_init();
 
@@ -50,19 +59,28 @@ function request_access_token(string $code): string
         CURLOPT_URL => ACCESS_TOKEN_URL_SPOTIFY,
         CURLOPT_POST => true,
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POSTFIELDS => $data,
+        CURLOPT_POSTFIELDS => http_build_query($data, '', '&', PHP_QUERY_RFC3986),
         CURLOPT_HTTPHEADER => [
-            'Content-type' => 'application/x-www-form-urlencoded',
-            'Authorization' => 'Basic ' . $token
+            'Content-Type: application/x-www-form-urlencoded',
+            'Authorization: Basic ' . $token
         ]
     ]);
 
-    $result = curl_exec($ch);
+    $response = curl_exec($ch);
 
-    if ($result == false) {
+    if ($response == false) {
         dump(curl_errno($ch), curl_error($ch));
         throw new RuntimeException("Impossible d'obtenir l'access token. Vérifier les credentials et réessayer.");
     }
 
-    return $result;
+    $response = json_decode($response, true);
+
+    dump($response);
+
+    return new AccessToken(
+        $response['access_token'],
+        $response['token_type'],
+        $response['expires_in'],
+        $response['refresh_token'],
+    );
 }

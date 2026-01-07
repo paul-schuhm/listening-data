@@ -13,5 +13,6 @@ define('CLIENT_ID', $config['client_id']);
 define('CLIENT_SECRET', $config['client_secret']);
 define('ACCESS_TOKEN_URL_SPOTIFY', $config['access_token_url']);
 define('AUTHORIZE_URL', $config['authorize_url']);
+define('BASE_URL', $config['base_url']);
 define('REDIRECT_URI', $config['redirect_uri']);
 define('REDIRECT_URI_SECURE', $config['redirect_uri_secure']);

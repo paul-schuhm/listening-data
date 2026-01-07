@@ -25,6 +25,7 @@ $params = array(
     'redirect_uri'  => REDIRECT_URI,
     /*@see https://developer.spotify.com/documentation/web-api/tutorials/code-flow*/
     'response_type' => 'code',
+    'show_dialog' => false
 );
 
 $auth_url = AUTHORIZE_URL . '?' . http_build_query($params);
@@ -56,4 +57,16 @@ fclose($socket);
 
 //Request access token
 $access_token = request_access_token($code);
+
 dump($access_token);
+
+//Test : afficher les infos personnelles
+
+$ch = curl_init();
+curl_setopt_array($ch, [
+    CURLOPT_URL => BASE_URL . '/me',
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer ' . $access_token->value
+    ]
+]);
+curl_exec($ch);
