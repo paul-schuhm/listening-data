@@ -16,50 +16,13 @@ if (!DEBUG_MODE) {
     });
 }
 
-//Si pas de refresh_token disponible, demander auth de l'user spotify.
+//if no available refresh token, ask first auth from spotify user
 if (!file_exists('refresh_token')) {
-    $params = array(
-        'client_id'     => CLIENT_ID,
-        'redirect_uri'  => REDIRECT_URI,
-        /*@see https://developer.spotify.com/documentation/web-api/tutorials/code-flow*/
-        'response_type' => 'code',
-        'show_dialog' => false
-    );
-
-    $auth_url = AUTHORIZE_URL . '?' . http_build_query($params);
-
-    //Redirection vers la page d'authentification user de Spotify (web form)
-    exec("xdg-open '$auth_url' >/dev/null 2>&1");
-
-    //Handle redirect URI from the browser by opening a socket
-    $socket = stream_socket_server('tcp://127.0.0.1:5005', $errno, $errstr);
-    $connexion = stream_socket_accept($socket);
-
-    $request = fread($connexion, 1024);
-
-    //Extract 'code' from the URL(request arg ?code=XXXX)
-    preg_match('#GET /\?([^ ]+)#', $request, $matches);
-    parse_str($matches[1] ?? '', $query_string);
-
-    $code = $query_string['code'] ?? null;
-
-    if ($code != null) {
-        fwrite($connexion, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n <p>Autorization granted</p>");
-    } else {
-        fwrite($connexion, "HTTP/1.1 400 OK\r\nContent-Type: text/plain\r\n\r\n <p>Autorization code missing. Please try again</p>");
-        throw new RuntimeException('Authorization code missing');
-    }
-
-    fclose($connexion);
-    fclose($socket);
-
-    //Request access token
+    //Obtain authorization : requires web form validation
+    $code = ask_for_auth();
     $access_token = request_access_token($code);
-
     //Store refresh token to store authorization and reuse it next time.
-    $file_refresh_token = fopen('refresh_token', 'w');
-    fwrite($file_refresh_token, $access_token->refresh_token);
-    fclose($file_refresh_token);
+    save_refresh_token($access_token);
 } else {
     //Ask new access token from refresh token (skip auth.)
     $refresh_token = file_get_contents('refresh_token');
@@ -67,9 +30,7 @@ if (!file_exists('refresh_token')) {
     $access_token = refresh_access_token($refresh_token);
 }
 
-
-
-//Test : afficher les infos personnelles
+//Test : print user info
 $ch = curl_init();
 curl_setopt_array($ch, [
     CURLOPT_URL => BASE_URL . '/me',

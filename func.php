@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Model of Access Token delivered by Spotify API
+ */
 readonly class AccessToken
 {
     public function __construct(
@@ -18,7 +21,7 @@ readonly class AccessToken
 require_once 'config.php';
 
 /**
- * Var_dump $data only in DEBUG_MODE
+ * Debugging function : var_dump $data only in DEBUG_MODE
  *
  * @param [type] ...$data
  * @return void
@@ -34,6 +37,51 @@ function dump(mixed ...$data): void
     }
 }
 
+
+/**
+ * Ask user for auth (OAuth 2 flow) to impersonate him
+ *
+ * @return string authorization code
+ */
+function ask_for_auth(): string
+{
+    $params = array(
+        'client_id'     => CLIENT_ID,
+        'redirect_uri'  => REDIRECT_URI,
+        /*@see https://developer.spotify.com/documentation/web-api/tutorials/code-flow/ */
+        'response_type' => 'code',
+        'show_dialog' => false
+    );
+
+    $auth_url = AUTHORIZE_URL . '?' . http_build_query($params);
+
+    //Redirection vers la page d'authentification user de Spotify (web form)
+    exec("xdg-open '$auth_url' >/dev/null 2>&1");
+
+    //Handle redirect URI from the browser by opening a socket
+    $socket = stream_socket_server('tcp://127.0.0.1:5005', $errno, $errstr);
+    $connexion = stream_socket_accept($socket);
+
+    $request = fread($connexion, 1024);
+
+    //Extract 'code' from the URL(request arg ?code=XXXX)
+    preg_match('#GET /\?([^ ]+)#', $request, $matches);
+    parse_str($matches[1] ?? '', $query_string);
+
+    $code = $query_string['code'] ?? null;
+
+    if ($code != null) {
+        fwrite($connexion, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n <p>Autorization granted</p>");
+    } else {
+        fwrite($connexion, "HTTP/1.1 400 OK\r\nContent-Type: text/plain\r\n\r\n <p>Autorization code missing. Please try again</p>");
+        throw new RuntimeException('Authorization code missing');
+    }
+
+    fclose($connexion);
+    fclose($socket);
+
+    return $code;
+}
 
 /**
  * Request and return Spotify access token, after authentication
@@ -87,6 +135,20 @@ function request_access_token(string $code): AccessToken
 
 
 /**
+ * Save refresh token for later use
+ *
+ * @param AccessToken $token
+ * @return void
+ */
+function save_refresh_token(AccessToken $token): void
+{
+    $file_refresh_token = fopen('refresh_token', 'w');
+    fwrite($file_refresh_token, $token->refresh_token);
+    fclose($file_refresh_token);
+}
+
+
+/**
  * Renew access token from previously stored refresh token
  *
  * @param string $refresh_token
@@ -94,7 +156,7 @@ function request_access_token(string $code): AccessToken
  */
 function refresh_access_token(string $refresh_token): AccessToken
 {
-     /*@see https://developer.spotify.com/documentation/web-api/tutorials/refreshing-tokens */
+    /*@see https://developer.spotify.com/documentation/web-api/tutorials/refreshing-tokens */
     $data = [
         'grant_type' => 'refresh_token',
         'refresh_token' => $refresh_token,
