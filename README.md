@@ -25,7 +25,7 @@ Récupérer des données et exporter les métadonnées d'écoute auprès de Spot
 > Pour l'URL de redirection de Spotify,[on peut utiliser en local une URL non sécurisée](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri)
 
 ~~~bash
-php -S localhost:5005 save-listening-data.php
+php -S localhost:5005 -t public
 ~~~
 
 ## Autre option : lancer le projet en local avec connexion sécurisée (HTTPS)
@@ -37,7 +37,7 @@ Pour cela, on utilise [stunnel](https://www.stunnel.org/) comme proxy TLS afin d
 1. Lancer le serveur intégré de PHP :
 
     ~~~bash
-    php -S localhost:5005 save-listening-data.php
+    php -S localhost:5005 -t public
     ~~~
 
 2. Lancer `stunnel` pour le support TLS :
