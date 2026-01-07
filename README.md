@@ -51,18 +51,17 @@ Pour cela, on utilise [stunnel](https://www.stunnel.org/) comme proxy TLS afin d
 
 ### Serveur local HTTPS avec `stunnel`, comment cela fonctionne ?
 
-1. `https://localhost` dans le navigateur initie une connexion TCP vers `127.0.0.1:443` ;
-2. Négociation TLS (certificat fourni par stunnel, crée avec mkcert), stunnel fait le TLS handshake avec le navigateur ;
-3. Connexion TCP sortante vers `127.0.0.1:5005` ;
-4. Transmission byte-for-byte du flux HTTP déchiffré ;
-5. PHP execute, écrit sur la socket TCP acceptée par le serveur (d'ailleurs <http://localhost:5005> fonctionne toujours comme avant !), sur la sortie standard du point de vue de PHP. Pour être tout à fait précis : PHP écrit la réponse HTTP sur STDOUT, que le SAPI cli-server envoie sur la socket TCP associée au client ;
-6. La réponse arrive sur la socket TCP ouverte par stunnel vers `:5005` ;
-7. stunnel :
+1. Demander `https://localhost` dans le navigateur initie une connexion TCP vers `127.0.0.1:443` ;
+2. Négociation TLS a lieu (certificat fourni par `stunnel`, crée avec `mkcert`), `stunnel` fait le TLS *handshake* avec le navigateur ;
+3. `stunnel` crée redirige vers `127.0.0.1:5005`, la connexion TCP sortante ;
+4. Transmission *byte-for-byte* du flux HTTP déchiffré vers le dameon PHP (serveur web intégré PHP) ;
+5. PHP s'exécute, écrit sur la socket TCP acceptée par le serveur (d'ailleurs <http://localhost:5005> fonctionne toujours comme avant !), sur la sortie standard du point de vue de PHP. Pour être tout à fait précis : PHP écrit la réponse HTTP sur `STDOUT`, que le SAPI `cli-server` envoie sur la socket TCP associée au client ;
+6. La réponse arrive sur la socket TCP ouverte par stunnel vers `:5005`. `stunnel` :
    1. lit le flux HTTP en clair,
    2. chiffre les octets via la session TLS existante,
-   3. les renvoie au navigateur sur la socket :443 ;
-8. Le navigateur :
-   1. déchiffre
+   3. les renvoie au navigateur sur la socket `:443` ;
+7. Le navigateur :
+   1. déchiffre le flux,
    2. traite la réponse comme une réponse HTTPS normale.
 
 Le trafic est *bidirectionnel* et *symétrique*.
