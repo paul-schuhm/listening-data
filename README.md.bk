@@ -1,3 +1,10 @@
+---
+ANCIEN FICHIER DE DOCUMENTATION AVEC UN PROGRAMME UTILISANT LE SERVEUR WEB LOCAL INTÉGRÉ DE PHP. 
+ON LE GARDE CAR INTÉRESSANT SUR CONFIG SERVEUR WEB LOCAL INTÉGRÉ PHP HTTPS AVEC STUNNEL.
+ON AURA PEUT-ETRE BESOIN D Y REVENIR PLUS TARD SI ON VEUT CONSTRUIRE UNE PAGE WEB POUR AFFICHER DES DONNEES ? 
+----
+
+
 # Listening Data (Spotify)
 
 Récupérer des données et exporter les métadonnées d'écoute auprès de Spotify, notamment pour faire un *backup* du compte (en particulier des *playlists*).
