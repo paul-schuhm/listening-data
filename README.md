@@ -5,7 +5,9 @@ Récupérer des données et exporter les métadonnées d'écoute auprès de Spot
 - [Listening Data (Spotify)](#listening-data-spotify)
   - [Installation](#installation)
   - [Lancer le projet](#lancer-le-projet)
-  - [Autre option : lancer le projet en local avec connexion sécurisée (HTTPS)](#autre-option--lancer-le-projet-en-local-avec-connexion-sécurisée-https)
+    - [Option 1 : CLI](#option-1--cli)
+    - [Option 2 : Avec un serveur web local (HTTP)](#option-2--avec-un-serveur-web-local-http)
+  - [Option 3 : Avec un serveur web local avec une connexion sécurisée (HTTPS)](#option-3--avec-un-serveur-web-local-avec-une-connexion-sécurisée-https)
     - [Serveur local HTTPS avec `stunnel`, comment cela fonctionne ?](#serveur-local-https-avec-stunnel-comment-cela-fonctionne-)
     - [Précautions](#précautions)
   - [Références utiles](#références-utiles)
@@ -22,13 +24,23 @@ Récupérer des données et exporter les métadonnées d'écoute auprès de Spot
 
 ## Lancer le projet
 
+
+### Option 1 : CLI
+
+~~~bash
+php index.php
+~~~
+
+
+### Option 2 : Avec un serveur web local (HTTP)
+
 > Pour l'URL de redirection de Spotify,[on peut utiliser en local une URL non sécurisée](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri)
 
 ~~~bash
 php -S localhost:5005 -t public
 ~~~
 
-## Autre option : lancer le projet en local avec connexion sécurisée (HTTPS)
+## Option 3 : Avec un serveur web local avec une connexion sécurisée (HTTPS)
 
 > Prérequis : installer mkcert, stunnel, installer un certificat authority CA local et générer un certificat pour le domaine localhost `localhost-bundle.pem`.
 

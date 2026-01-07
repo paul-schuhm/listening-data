@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * Module containing all functions.
+ */
+
+
+/**
  * Request and return access token
  *
  * @param string $code Token obtained after user grand client app autorization
@@ -20,21 +25,3 @@ function request_access_token(string $code): string
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     curl_exec($ch);
 }
-
-
-if (isset($_GET['error'])) {
-    $msg = sprintf("Erreur : %s. Merci de réessayer.", $_GET['error']);
-    die("Une erreur est survenue. Merci de réessayer plus tard.");
-}
-
-$code = $_GET['code'] ?? null;
-
-if ($code == null) {
-    die("Une erreur est survenue. Merci de réessayer plus tard.");
-}
-
-
-echo "Ask for access token...";
-die;
-
-$access_token = request_access_token($code);
