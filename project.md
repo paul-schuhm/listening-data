@@ -2,8 +2,8 @@
 
 - Se (re)former sur serveur local php intégré en HTTPS (stunnel, mkcert), gérer socket TCP en PHP, interface cURL php [x]
 - Écrire un programme sans interface web (serveur local) [x]
-- Obtenir l'access token []
-- Ne pas devoir donner auth à chaque fois à l'app cliente, utiliser refresh_token [x]
+- Obtenir l'access token [x]
+- Ne pas devoir donner auth à chaque fois à l'app cliente, **utiliser refresh_token** [x]
 
 C'est **le but du refresh token** :https://developer.spotify.com/documentation/web-api/tutorials/refreshing-tokens
 
@@ -14,5 +14,5 @@ C'est **le but du refresh token** :https://developer.spotify.com/documentation/w
 - Accéder aux playlists de l'utilisateur []
 - Backup des playlists []
 - Obtenir les stats d'écoute (top, Spotify ne donne pas beaucoup d'infos... Business is business...) []
-- Écrire un bot (cron) qui ajoute quelques musiques recommandées dans une playlist []
 - Have fun [x]
+- Écrire un bot (cron) qui ajoute quelques musiques recommandées dans une playlist []

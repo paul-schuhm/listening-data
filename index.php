@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Ce programme interroge Spotify pour récupérer des stats d'écoute et exporter les métadonnées d'écoute pour faire un backup du profil : historique d'écoute, playlists et contenu. Ce backup permettra d'importer toutes ces données (notamment playlists) vers un autre compte ou service plus tard.
+ * This program queries Spotify to retrieve (scarce...) listening stats and export listening metadata to create a profile backup: listening history, playlists, and their contents.
+ * This backup will allow importing all this data (notably playlists) into another account or service later.
  *
  * @package PS\ListeningData
  * @author Paul Schuhmacher
