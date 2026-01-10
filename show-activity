@@ -19,13 +19,15 @@ if (!DEBUG_MODE) {
 }
 
 /*@see https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks */
+/**
+ * Périodes sur lesquelles analyser l'activité d'écoute et établir les tops.
+ */
 enum TopTimeRange: string
 {
     case Short = 'short_term';
     case Medium = 'medium_term';
     case Long = 'long_term';
 }
-
 
 /**
  * BEGINNING OF THE PROCEDURE
@@ -41,8 +43,7 @@ if (!isset($me['id'])) {
 
 define('CURRENT_USER_ID', $me['id']);
 
-
-/*Stats sur quelle période*/
+/*Stats sur quelle(s) période(s)*/
 $time_ranges = [
     /*~ Last 4 weeks*/
     TopTimeRange::Short,
@@ -52,7 +53,6 @@ $time_ranges = [
 
 define('RESOURCE_TOP_TRACKS', '/me/top/tracks');
 define('LIMIT_RESULTS_TRACKS', 25);
-
 
 foreach ($time_ranges as $time_range) {
 

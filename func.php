@@ -89,6 +89,7 @@ function ask_for_auth(): string
     $auth_url = sprintf("%s?%s", AUTHORIZE_URL, http_build_query($query_params));
 
     //Redirection vers la page d'authentification user de Spotify (web form)
+    //Remarque : je ne pense pas que cette instruction soit portable...
     exec("xdg-open '$auth_url' >/dev/null 2>&1");
 
     //Handle redirect URI from the browser by opening a socket

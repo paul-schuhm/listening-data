@@ -1,5 +1,6 @@
 <?php
 
+/*Activer/Desactivier le mode debug. Utilisée par la fonction dump().*/
 define('DEBUG_MODE', true);
 
 //Load data and env variables from a local config.ini file placed at the root of the project
@@ -14,7 +15,7 @@ if (
     !isset($config['client_id'])  ||
     !isset($config['access_token_url'])
 ) {
-    die("Fournir les informations client_id et client_secret");
+    throw new Exception("Fournir les informations client_id et client_secret nécessaires au programme.");
 }
 
 define('CLIENT_ID', $config['client_id']);
