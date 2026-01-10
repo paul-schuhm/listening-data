@@ -79,7 +79,8 @@ function ask_for_auth(): string
         'redirect_uri'  => REDIRECT_URI,
         /*@see https://developer.spotify.com/documentation/web-api/tutorials/code-flow/ */
         'response_type' => 'code',
-        'show_dialog' => false
+        'show_dialog' => false,
+        'scope' => 'playlist-read-private'
     );
 
     $auth_url = AUTHORIZE_URL . '?' . http_build_query($params);
@@ -321,7 +322,7 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
         }
     }
 
-    printf("Playlists to save: %d\n", count($playlist_to_save));
+    printf("Playlists to save (%s): %d\n", $which_one, count($playlist_to_save));
 
     $position = 0;
     foreach ($playlist_to_save as $playlist) {
