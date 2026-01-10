@@ -3,24 +3,35 @@
 Récupérer des données et exporter les métadonnées d'écoute auprès de Spotify, notamment pour faire un *backup* du compte (en particulier des *playlists*).
 
 - [Listening Data (Spotify)](#listening-data-spotify)
-  - [Installation](#installation)
-  - [Lancer le programme](#lancer-le-programme)
+  - [Installer](#installer)
+  - [Utiliser](#utiliser)
+    - [Réaliser un backup des playlists](#réaliser-un-backup-des-playlists)
+    - [Afficher activité d'écoute (top tracks, artistes) sur différentes périodes](#afficher-activité-découte-top-tracks-artistes-sur-différentes-périodes)
   - [Références utiles](#références-utiles)
 
-## Installation
+## Installer
 
 1. **Créez** le fichier de configuration `config.ini` :
 
     ~~~bash
     cp config.ini.dist config.ini
+    chmod +x backup-playlists show-activity
     ~~~
 
 2. **Renseignez-y** les credentials et données de votre application cliente Spotify.
 
-## Lancer le programme
+## Utiliser
+
+### Réaliser un backup des playlists
 
 ~~~bash
-php index.php
+./backup-playlists
+~~~
+
+### Afficher activité d'écoute (top tracks, artistes) sur différentes périodes
+
+~~~bash
+./show-activity
 ~~~
 
 ## Références utiles
