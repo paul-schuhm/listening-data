@@ -1,15 +1,17 @@
 # Listening Data (Spotify)
 
-Récupérer des données et exporter les métadonnées d'écoute auprès de Spotify, notamment pour faire un *backup* du compte (en particulier des *playlists*).
+Un client Spotify pour faire un backup des playlists et monitorer l'activité d'écoute.
 
 - [Listening Data (Spotify)](#listening-data-spotify)
-  - [Installer](#installer)
+  - [Installer les programmes](#installer-les-programmes)
   - [Utiliser](#utiliser)
-    - [Réaliser un backup des playlists](#réaliser-un-backup-des-playlists)
-    - [Afficher activité d'écoute (top tracks, artistes) sur différentes périodes](#afficher-activité-découte-top-tracks-artistes-sur-différentes-périodes)
+    - [Réaliser un backup de vos playlists](#réaliser-un-backup-de-vos-playlists)
+    - [Afficher l'activité d'écoute (top tracks et artistes) sur différentes périodes](#afficher-lactivité-découte-top-tracks-et-artistes-sur-différentes-périodes)
   - [Références utiles](#références-utiles)
 
-## Installer
+## Installer les programmes
+
+> Prérequis : installer PHP 8+.
 
 1. **Créez** le fichier de configuration `config.ini` :
 
@@ -22,13 +24,13 @@ Récupérer des données et exporter les métadonnées d'écoute auprès de Spot
 
 ## Utiliser
 
-### Réaliser un backup des playlists
+### Réaliser un backup de vos playlists
 
 ~~~bash
 ./backup-playlists
 ~~~
 
-### Afficher activité d'écoute (top tracks, artistes) sur différentes périodes
+### Afficher l'activité d'écoute (top tracks et artistes) sur différentes périodes
 
 ~~~bash
 ./show-activity
