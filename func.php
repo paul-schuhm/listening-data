@@ -39,7 +39,7 @@ function dump(mixed ...$data): void
 /**
  * Retourne un token d'accès au compte utilisateur
  *
- * @return string
+ * @return AccessToken
  */
 function connect(): AccessToken
 {
@@ -74,16 +74,19 @@ function connect(): AccessToken
  */
 function ask_for_auth(): string
 {
-    $params = array(
+
+    /*@see https://developer.spotify.com/documentation/web-api/concepts/scopes*/
+    $scopes = ['playlist-read-private', 'user-top-read'];
+
+    $query_params = array(
         'client_id'     => CLIENT_ID,
         'redirect_uri'  => REDIRECT_URI,
         /*@see https://developer.spotify.com/documentation/web-api/tutorials/code-flow/ */
         'response_type' => 'code',
-        'show_dialog' => false,
-        'scope' => 'playlist-read-private'
+        'scope' => implode(' ', $scopes)
     );
 
-    $auth_url = AUTHORIZE_URL . '?' . http_build_query($params);
+    $auth_url = sprintf("%s?%s", AUTHORIZE_URL, http_build_query($query_params));
 
     //Redirection vers la page d'authentification user de Spotify (web form)
     exec("xdg-open '$auth_url' >/dev/null 2>&1");
@@ -232,8 +235,8 @@ function refresh_access_token(string $refresh_token): AccessToken
  *
  * @param string $ressource
  * @param AccessToken $access_token
- * @param string $method
- * @param string $format
+ * @param string $method. Default : GET
+ * @param string $format. Default : ARRAY (call json_decode)
  * @return mixed
  */
 function request(string $ressource, AccessToken $access_token, string $method = 'GET', string $format = 'ARRAY'): mixed
@@ -262,7 +265,12 @@ function request(string $ressource, AccessToken $access_token, string $method = 
     return $response;
 }
 
-
+/**
+ * Affiche sur la sortie les informations d'une playlist sur une ligne
+ *
+ * @param array $playlist
+ * @return void
+ */
 function printf_playlist_data(array $playlist): void
 {
 
@@ -325,6 +333,7 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
     printf("Playlists to save (%s): %d\n", $which_one, count($playlist_to_save));
 
     $position = 0;
+
     foreach ($playlist_to_save as $playlist) {
 
         //Keep only track metadata i'm interested in
@@ -339,7 +348,13 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
 }
 
 
-function format_2_filename(string $name)
+/**
+ * Sanitize le nom d'une playlist pour le transformer en nom de fichier valide et sécurisé
+ *
+ * @param string $name Le nom de la playlist
+ * @return string
+ */
+function format_2_filename(string $name): string
 {
     $name = trim($name);
     $name = str_replace(" ", "-", $name);
@@ -350,6 +365,15 @@ function format_2_filename(string $name)
 }
 
 
+/**
+ * Enregistre une copie de la playlist (tracks) au format JSON dans un fichier texte.
+ *
+ * @param array $playlist
+ * @param string $tracks
+ * @param integer $position
+ * @param integer $total
+ * @return integer|boolean
+ */
 function save_playlist_locally(array $playlist, string $tracks, int $position, int $total): int|bool
 {
     if (!defined('BACKUP_DIR')) {

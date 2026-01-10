@@ -1,0 +1,103 @@
+#!/bin/php
+<?php
+
+/**
+ * This program queries Spotify to retrieve listening stats (scarce...) and monitor listening activity
+ * over different periods of time.
+ *
+ * @package PS\ListeningData
+ * @author Paul Schuhmacher
+ */
+
+require_once 'config.php';
+require_once 'func.php';
+
+if (!DEBUG_MODE) {
+    set_exception_handler(function (Exception $e) {
+        die($e->getMessage());
+    });
+}
+
+/*@see https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks */
+enum TopTimeRange: string
+{
+    case Short = 'short_term';
+    case Medium = 'medium_term';
+    case Long = 'long_term';
+}
+
+
+/**
+ * BEGINNING OF THE PROCEDURE
+ */
+
+$access_token = connect();
+
+$me = request('/me', $access_token);
+
+if (!isset($me['id'])) {
+    exit("Aucun identifiant de compte utilisateur obtenu. Réessayer.");
+}
+
+define('CURRENT_USER_ID', $me['id']);
+
+
+/*Stats sur quelle période*/
+$time_ranges = [
+    /*~ Last 4 weeks*/
+    TopTimeRange::Short,
+    /*~ Last 1 year*/
+    TopTimeRange::Long,
+];
+
+define('RESOURCE_TOP_TRACKS', '/me/top/tracks');
+define('LIMIT_RESULTS_TRACKS', 25);
+
+
+foreach ($time_ranges as $time_range) {
+
+    $query_params = [
+        'time_range' => $time_range->value,
+        'limit' => LIMIT_RESULTS_TRACKS
+    ];
+
+    $resource_top_tracks = sprintf("%s?%s", RESOURCE_TOP_TRACKS, http_build_query($query_params));
+    $top_tracks = request($resource_top_tracks, $access_token);
+
+    printf("*Top %d tracks : (%s) \n", LIMIT_RESULTS_TRACKS, $time_range->value);
+
+    $position = 1;
+    foreach ($top_tracks['items'] as $track) {
+        $artists = [];
+        foreach ($track['artists'] as $artist) {
+            $artists[] = $artist['name'];
+        }
+        $line = sprintf(" %2d. %s (%s)", $position++, $track['name'], implode(', ', $artists));
+        echo $line . PHP_EOL;
+    }
+    printf("\n");
+}
+
+define('RESOURCE_TOP_ARTISTS', '/me/top/artists');
+define('LIMIT_RESULTS_ARTISTS', 20);
+
+foreach ($time_ranges as $time_range) {
+
+    $query_params = [
+        'time_range' => $time_range->value,
+        'limit' => LIMIT_RESULTS_ARTISTS
+    ];
+
+    $resource_top_artists = sprintf("%s?%s", RESOURCE_TOP_ARTISTS, http_build_query($query_params));
+    $top_artists = request($resource_top_artists, $access_token);
+
+    printf("*Top %d artists : (%s) \n", LIMIT_RESULTS_ARTISTS, $time_range->value);
+
+    $position = 1;
+    foreach ($top_artists['items'] as $artist) {
+
+        $line = sprintf(" %2d. %s", $position++, $artist['name']);
+        echo $line . PHP_EOL;
+    }
+    printf("\n");
+}
