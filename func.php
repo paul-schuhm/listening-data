@@ -323,17 +323,17 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
 
     printf("Playlists to save: %d\n", count($playlist_to_save));
 
+    $position = 0;
     foreach ($playlist_to_save as $playlist) {
 
-
+        //Keep only track metadata i'm interested in
         //@see https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
         $query_params_filter_track_data = http_build_query([
-            'fields' => 'items(track(name,href,album(name,href)))'
+            'fields' => 'items(track(name,href,track_number,uri, popularity, duration_ms, external_urls,album(name,href), artists(name)))'
         ]);
-
         $ressource = sprintf("/playlists/%s/tracks?%s", $playlist['id'], $query_params_filter_track_data);
         $tracks = request($ressource, $access_token, method: 'GET', format: 'ROW_JSON');
-        save_playlist_locally($playlist, $tracks);
+        save_playlist_locally($playlist, $tracks, ++$position, count($playlist_to_save));
     }
 }
 
@@ -349,7 +349,7 @@ function format_2_filename(string $name)
 }
 
 
-function save_playlist_locally(array $playlist, string $tracks): int|bool
+function save_playlist_locally(array $playlist, string $tracks, int $position, int $total): int|bool
 {
     if (!defined('BACKUP_DIR')) {
         throw new RuntimeException("La valeur BACKUP_DIR (path où sauver les playlists) n'est pas défini !");
@@ -366,7 +366,7 @@ function save_playlist_locally(array $playlist, string $tracks): int|bool
     $res = fwrite($file, $tracks);
     fclose($file);
     if ($res != false) {
-        printf("%s playlist saved\n", $playlist['name']);
+        printf(" - (%d/%d) Playlist %s saved\n", $position, $total, $playlist['name']);
     }
 
     return $res;
