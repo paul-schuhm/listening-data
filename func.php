@@ -10,8 +10,7 @@ readonly class AccessToken
         public string $type,
         public string $expires_in,
         public string $refresh_token,
-    ) {
-    }
+    ) {}
 }
 
 /**
@@ -35,6 +34,36 @@ function dump(mixed ...$data): void
     foreach ($data as $value) {
         var_dump($value);
     }
+}
+
+/**
+ * Retourne un token d'accès au compte utilisateur
+ *
+ * @return string
+ */
+function connect(): AccessToken
+{
+
+    $access_token = NULL;
+
+    //if no available refresh token, ask first auth from spotify user
+    if (!file_exists('refresh_token')) {
+        //Obtain authorization : requires web form validation
+        $code = ask_for_auth();
+        $access_token = request_access_token($code);
+        //Store refresh token to store authorization and reuse it next time.
+        save_refresh_token($access_token);
+    } else {
+        //Ask new access token from refresh token (skip auth.)
+        $refresh_token = file_get_contents('refresh_token');
+        $access_token = refresh_access_token($refresh_token);
+    }
+
+    if ($access_token === NULL) {
+        throw new RuntimeException("Impossible de se connecter au compte utilisateur. Rééssayer.");
+    }
+
+    return $access_token;
 }
 
 
@@ -186,8 +215,6 @@ function refresh_access_token(string $refresh_token): AccessToken
 
     $response = json_decode($response, true);
 
-    dump($response);
-
     return new AccessToken(
         $response['access_token'],
         $response['token_type'],
@@ -196,4 +223,151 @@ function refresh_access_token(string $refresh_token): AccessToken
         //(@see https://developer.spotify.com/documentation/web-api/tutorials/refreshing-tokens, section Response )
         $response['refresh_token'] ?? $refresh_token,
     );
+}
+
+
+/**
+ * Executer une requête HTTP sur une ressource.
+ *
+ * @param string $ressource
+ * @param AccessToken $access_token
+ * @param string $method
+ * @param string $format
+ * @return mixed
+ */
+function request(string $ressource, AccessToken $access_token, string $method = 'GET', string $format = 'ARRAY'): mixed
+{
+    $ch = curl_init();
+
+    curl_setopt_array($ch, [
+        CURLOPT_URL => BASE_URL . $ressource,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $access_token->value
+        ]
+    ]);
+
+    $response = curl_exec($ch);
+
+    if ($response == false) {
+        dump(curl_errno($ch), curl_error($ch));
+        throw new RuntimeException("Une erreur est survenue.");
+    }
+
+    if ($format === 'ARRAY') {
+        $response = json_decode($response, true);
+    }
+
+    return $response;
+}
+
+
+function printf_playlist_data(array $playlist): void
+{
+
+    if (!is_array($playlist) || !isset($playlist['name'])) {
+        return;
+    }
+
+    $width = 33;
+
+    $pad = $width - mb_strwidth($playlist['name'], 'UTF-8');
+
+    printf(
+        "- playlist: %s%s | Number of tracks: %3d | Owner : %s\n",
+        $playlist['name'],
+        str_repeat(' ', max(0, $pad)),
+        intval($playlist['tracks']['total']),
+        $playlist['owner']['display_name']
+    );
+}
+
+
+/**
+ * Fais un backup des playlists sur la machine.
+ *
+ * @param AccessToken $access_token
+ * @param string $which_one Quelles playlists. Default: ALL. Values : OWNED, ALL
+ * @return void
+ */
+function backup_playlists(AccessToken $access_token, string $current_user_id, string $which_one = 'ALL')
+{
+
+    $playlists = request('/me/playlists', $access_token);
+
+    printf("Total number of playlists : %d\n", intval($playlists['total']));
+
+    $playlist_to_save = [];
+
+    foreach ($playlists['items'] as $playlist) {
+
+        $SAVE = false;
+
+        switch ($which_one) {
+            case 'ALL':
+                $playlist_to_save[] = $playlist;
+                $SAVE = true;
+                break;
+            case 'OWNED_ONLY':
+                if ($playlist['owner']['id'] === $current_user_id) {
+                    $playlist_to_save[] = $playlist;
+                    $SAVE = true;
+                }
+                break;
+        }
+
+        if ($SAVE) {
+            printf_playlist_data($playlist);
+        }
+    }
+
+    printf("Playlists to save: %d\n", count($playlist_to_save));
+
+    foreach ($playlist_to_save as $playlist) {
+
+
+        //@see https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
+        $query_params_filter_track_data = http_build_query([
+            'fields' => 'items(track(name,href,album(name,href)))'
+        ]);
+
+        $ressource = sprintf("/playlists/%s/tracks?%s", $playlist['id'], $query_params_filter_track_data);
+        $tracks = request($ressource, $access_token, method: 'GET', format: 'ROW_JSON');
+        save_playlist_locally($playlist, $tracks);
+    }
+}
+
+
+function format_2_filename(string $name)
+{
+    $name = trim($name);
+    $name = str_replace(" ", "-", $name);
+    $name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $name);
+    $name = strip_tags($name);
+    $name = strtolower($name);
+    return $name;
+}
+
+
+function save_playlist_locally(array $playlist, string $tracks): int|bool
+{
+    if (!defined('BACKUP_DIR')) {
+        throw new RuntimeException("La valeur BACKUP_DIR (path où sauver les playlists) n'est pas défini !");
+    }
+    $dir = BACKUP_DIR;
+
+    if (!is_dir($dir) && !mkdir($dir, 0775, true)) {
+        throw new RuntimeException("Impossible de créer $dir");
+    }
+
+    //les playlists ont un historique de versions (snapshot), on enregistre donc les playlists dans leur dernier état.
+    $file_playlist = sprintf("$dir/%s.json", format_2_filename($playlist['name']));
+    $file = fopen($file_playlist, 'w');
+    $res = fwrite($file, $tracks);
+    fclose($file);
+    if ($res != false) {
+        printf("%s playlist saved\n", $playlist['name']);
+    }
+
+    return $res;
 }

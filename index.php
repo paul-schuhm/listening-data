@@ -17,26 +17,16 @@ if (!DEBUG_MODE) {
     });
 }
 
-//if no available refresh token, ask first auth from spotify user
-if (!file_exists('refresh_token')) {
-    //Obtain authorization : requires web form validation
-    $code = ask_for_auth();
-    $access_token = request_access_token($code);
-    //Store refresh token to store authorization and reuse it next time.
-    save_refresh_token($access_token);
-} else {
-    //Ask new access token from refresh token (skip auth.)
-    $refresh_token = file_get_contents('refresh_token');
-    dump($refresh_token);
-    $access_token = refresh_access_token($refresh_token);
+$access_token = connect();
+
+$me = request('/me', $access_token);
+
+if (!isset($me['id'])) {
+    exit("Aucun identifiant de compte utilisateur obtenu. Réessayer.");
 }
 
-//Test : print user info
-$ch = curl_init();
-curl_setopt_array($ch, [
-    CURLOPT_URL => BASE_URL . '/me',
-    CURLOPT_HTTPHEADER => [
-        'Authorization: Bearer ' . $access_token->value
-    ]
-]);
-curl_exec($ch);
+define('CURRENT_USER_ID', $me['id']);
+
+printf("Account: %s (id: %s)\n", $me['display_name'], CURRENT_USER_ID);
+
+backup_playlists($access_token, CURRENT_USER_ID, 'OWNED_ONLY');
