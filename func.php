@@ -410,23 +410,23 @@ function format_2_filename(string $name): string
 
 
 /**
- * Save a copy of the playlist (tracks) in JSON format to a text file named after the playlist name
+ * Save a copy of the playlist tracks in JSON format to a text file named after the playlist
  *
  * @param array $playlist Playlist to save. Key 'name' required
  * @param string $tracks List of tracks (JSON format)
- * @param integer $position Position of the playlist in the playlist queue. Optional
- * @param integer $total Total number of playlists to save. Optional
+ * @param null|integer $position. Optional. Position of the playlist in the playlist queue
+ * @param null|integer $total. Optional. Total number of playlists in the queue
  * @return integer|boolean
  */
 function save_playlist_locally(array $playlist, string $tracks, ?int $position = null, ?int $total = null): int|bool
 {
     if (!defined('BACKUP_DIR')) {
-        throw new RuntimeException("La valeur BACKUP_DIR (path où sauver les playlists) n'est pas défini !");
+        throw new RuntimeException("La valeur BACKUP_DIR (PATH où sauver les playlists) n'est pas défini. Le définir est relancer le programme.");
     }
     $dir = BACKUP_DIR;
 
     if (!is_dir($dir) && !mkdir($dir, 0775, true)) {
-        throw new RuntimeException("Impossible de créer $dir");
+        throw new RuntimeException("Impossible de créer $dir. Revoir les permissions sur le path concerné et relancer le programme.");
     }
 
     //les playlists ont un historique de versions (snapshot), on enregistre donc les playlists dans leur dernier état.
