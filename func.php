@@ -46,7 +46,7 @@ function connect(): AccessToken
 
     $access_token = NULL;
 
-    //if no available refresh token, ask first auth from spotify user
+    //if no available refresh token, ask first auth from Spotify user
     if (!file_exists('refresh_token')) {
         //Obtain authorization : requires web form validation
         $code = ask_for_auth();
@@ -60,7 +60,7 @@ function connect(): AccessToken
     }
 
     if ($access_token === NULL) {
-        throw new RuntimeException("Impossible de se connecter au compte utilisateur. Rééssayer.");
+        throw new RuntimeException("Impossible de se connecter au compte utilisateur. Réessayer.");
     }
 
     return $access_token;
@@ -93,7 +93,7 @@ function ask_for_auth(): string
     exec("xdg-open '$auth_url' >/dev/null 2>&1");
 
     //Handle redirect URI from the browser by opening a socket
-    $socket = stream_socket_server('tcp://127.0.0.1:5005', $errno, $errstr);
+    $socket = stream_socket_server('tcp://' . REDIRECT_URI, $errno, $errstr);
     $connexion = stream_socket_accept($socket);
 
     $request = fread($connexion, 1024);
