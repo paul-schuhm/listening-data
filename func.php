@@ -37,14 +37,18 @@ function dump(mixed ...$data): void
 }
 
 /**
- * Retourne un token d'accès au compte utilisateur
+ * Authenticates the user with Spotify and returns a valid access token.
+ * If a refresh token is available locally, it is used to obtain a new
+ * access token without user interaction. Otherwise, the OAuth
+ * authorization flow is triggered and the resulting refresh token
+ * is stored for future use.
  *
  * @return AccessToken
  */
 function connect(): AccessToken
 {
 
-    $access_token = NULL;
+    $access_token = null;
 
     //if no available refresh token, ask first auth from Spotify user
     if (!file_exists('refresh_token')) {
@@ -59,7 +63,7 @@ function connect(): AccessToken
         $access_token = refresh_access_token($refresh_token);
     }
 
-    if ($access_token === NULL) {
+    if ($access_token === null) {
         throw new RuntimeException("Impossible de se connecter au compte utilisateur. Réessayer.");
     }
 
@@ -98,7 +102,7 @@ function ask_for_auth(): string
 
     $request = fread($connexion, 1024);
 
-    //Extract 'code' from the URL(request arg ?code=XXXX)
+    //Extract 'code' from the URL(request arg URL ?code=XXXXxxxx)
     preg_match('#GET /\?([^ ]+)#', $request, $matches);
     parse_str($matches[1] ?? '', $query_string);
 
@@ -118,10 +122,10 @@ function ask_for_auth(): string
 }
 
 /**
- * Request and return Spotify access token, after authentication
+ * Return the Spotify access token once the user has authenticated and granted authorization
  *
- * @param string $code Token obtained after Spotify user has granted authorization to this client app.
- * @return AccessToken
+ * @param string $code Token obtained after Spotify user has granted authorization to this client app
+ * @return AccessToken Necessary for any further requests
  */
 function request_access_token(string $code): AccessToken
 {
@@ -232,7 +236,7 @@ function refresh_access_token(string $refresh_token): AccessToken
 
 
 /**
- * Executer une requête HTTP sur une ressource.
+ * Send an HTTP request
  *
  * @param string $ressource
  * @param AccessToken $access_token
@@ -267,7 +271,7 @@ function request(string $ressource, AccessToken $access_token, string $method = 
 }
 
 /**
- * Affiche sur la sortie les informations d'une playlist sur une ligne
+ * Print the playlist information on a single line
  *
  * @param array $playlist
  * @return void
@@ -294,10 +298,10 @@ function printf_playlist_data(array $playlist): void
 
 
 /**
- * Fais un backup des playlists sur la machine.
+ * Save all of the user's playlists locally as JSON.
  *
  * @param AccessToken $access_token
- * @param string $which_one Quelles playlists. Default: ALL. Values : OWNED, ALL
+ * @param string $which_one Which playlists to save ? Default: ALL. Possible values : 'OWNED', 'ALL'
  * @return void
  */
 function backup_playlists(AccessToken $access_token, string $current_user_id, string $which_one = 'ALL')
@@ -348,7 +352,7 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
 }
 
 /**
- * Fais un backup de la playlist 'Your music' (morceaux likés) sur la machine
+ * Save locally the special playlist 'Your music' (Liked tracks)
  *
  * @param AccessToken $access_token
  * @return void
@@ -389,7 +393,7 @@ function backup_liked_tracks(AccessToken $access_token)
 
 
 /**
- * Sanitize le nom d'une playlist pour le transformer en nom de fichier valide et sécurisé
+ * Sanitize the playlist name to produce a valid, safe filename
  *
  * @param string $name Le nom de la playlist
  * @return string
@@ -406,7 +410,7 @@ function format_2_filename(string $name): string
 
 
 /**
- * Enregistre une copie de la playlist (tracks) au format JSON dans un fichier texte.
+ * Save a copy of the playlist (tracks) in JSON format to a text file named after the playlist name
  *
  * @param array $playlist Playlist to save. Key 'name' required
  * @param string $tracks List of tracks (JSON format)
@@ -414,7 +418,7 @@ function format_2_filename(string $name): string
  * @param integer $total Total number of playlists to save. Optional
  * @return integer|boolean
  */
-function save_playlist_locally(array $playlist, string $tracks, int $position = null, int $total = null): int|bool
+function save_playlist_locally(array $playlist, string $tracks, ?int $position = null, ?int $total = null): int|bool
 {
     if (!defined('BACKUP_DIR')) {
         throw new RuntimeException("La valeur BACKUP_DIR (path où sauver les playlists) n'est pas défini !");
