@@ -76,7 +76,7 @@ function ask_for_auth(): string
 {
 
     /*@see https://developer.spotify.com/documentation/web-api/concepts/scopes*/
-    $scopes = ['playlist-read-private', 'user-top-read'];
+    $scopes = ['playlist-read-private', 'user-top-read', 'user-library-read'];
 
     $query_params = array(
         'client_id'     => CLIENT_ID,
@@ -302,7 +302,6 @@ function printf_playlist_data(array $playlist): void
  */
 function backup_playlists(AccessToken $access_token, string $current_user_id, string $which_one = 'ALL')
 {
-
     $playlists = request('/me/playlists', $access_token);
 
     printf("Total number of playlists : %d\n", intval($playlists['total']));
@@ -348,6 +347,44 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
     }
 }
 
+/**
+ * Fais un backup de la playlist 'Your music' (morceaux likés) sur la machine
+ *
+ * @param AccessToken $access_token
+ * @return void
+ */
+function backup_liked_tracks(AccessToken $access_token)
+{
+    //Liked tracks list ('Your music') is paginated, 50max
+    $tracks = [];
+    $offset = 0;
+    $limit = 50;
+
+    printf("Collecting saved tracks :\n");
+    do {
+        $query_params = http_build_query([
+            'offset' => $offset,
+            'limit' => $limit,
+            'fields' => 'next, total, items(track(name,href,uri,external_urls,album(name,href),artists(name)))'
+        ]);
+
+        $resource = sprintf("/me/tracks?%s", $query_params);
+        $response = request($resource, $access_token);
+        if (isset($response['items'])) {
+            $tracks = array_merge($tracks, $response['items']);
+        }
+        $offset += $limit;
+
+        printf("%d/%d (%02.1f%%)\n", count($tracks), $response['total'], count($tracks) / $response['total'] * 100);
+    } while (isset($response['next']));
+
+    $playlist = [
+        'name' => 'saved_tracks'
+    ];
+
+    save_playlist_locally($playlist, json_encode($tracks));
+}
+
 
 /**
  * Sanitize le nom d'une playlist pour le transformer en nom de fichier valide et sécurisé
@@ -369,13 +406,13 @@ function format_2_filename(string $name): string
 /**
  * Enregistre une copie de la playlist (tracks) au format JSON dans un fichier texte.
  *
- * @param array $playlist
- * @param string $tracks
- * @param integer $position
- * @param integer $total
+ * @param array $playlist Playlist to save. Key 'name' required
+ * @param string $tracks List of tracks (JSON format)
+ * @param integer $position Position of the playlist in the playlist queue. Optional
+ * @param integer $total Total number of playlists to save. Optional
  * @return integer|boolean
  */
-function save_playlist_locally(array $playlist, string $tracks, int $position, int $total): int|bool
+function save_playlist_locally(array $playlist, string $tracks, int $position = null, int $total = null): int|bool
 {
     if (!defined('BACKUP_DIR')) {
         throw new RuntimeException("La valeur BACKUP_DIR (path où sauver les playlists) n'est pas défini !");
@@ -391,8 +428,13 @@ function save_playlist_locally(array $playlist, string $tracks, int $position, i
     $file = fopen($file_playlist, 'w');
     $res = fwrite($file, $tracks);
     fclose($file);
+
     if ($res != false) {
-        printf(" - (%d/%d) Playlist %s saved\n", $position, $total, $playlist['name']);
+        if ($position == null || $total == null) {
+            printf("Playlist %s saved\n", $playlist['name']);
+        } else {
+            printf(" - (%d/%d) Playlist %s saved\n", $position, $total, $playlist['name']);
+        }
     }
 
     return $res;
