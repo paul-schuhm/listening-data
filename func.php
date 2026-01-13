@@ -301,7 +301,7 @@ function printf_playlist_data(array $playlist): void
  * Save all of the user's playlists locally as JSON.
  *
  * @param AccessToken $access_token
- * @param string $which_one Which playlists to save ? Default: ALL. Possible values : 'OWNED', 'ALL'
+ * @param string $which_one Which playlists to save ? Default: ALL. Possible values : 'OWNED_ONLY', 'ALL'
  * @return void
  */
 function backup_playlists(AccessToken $access_token, string $current_user_id, string $which_one = 'ALL')
