@@ -17,10 +17,14 @@ Un client Spotify pour faire un backup des playlists et monitorer l'activité d'
 
     ~~~bash
     cp config.ini.dist config.ini
-    chmod +x backup-playlists show-activity
     ~~~
 
 2. **Renseignez-y** les *credentials* et données de [votre application cliente Spotify](https://developer.spotify.com/documentation/web-api/concepts/apps).
+3. Rendre les programmes **exécutables** :
+
+    ~~~bash
+    chmod +x backup-playlists show-activity
+    ~~~
 
 ## Utiliser
 
