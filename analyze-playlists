@@ -46,11 +46,67 @@ foreach ($files as $file) {
         continue;
     }
 
-    $tracks = json_decode($content);
+    $items = json_decode($content);
 
-    if ($tracks == null) {
+    if ($items == null) {
         echo "Les données sur la playlist ne sont pas dans un format JSON valide. Playlist ignorée." . PHP_EOL;
         continue;
     }
-    ddump($tracks);
+
+    $result = [];
+    $result['$total'] = 0;
+
+    foreach ($items as $item) {
+
+        $artists = $item->track->artists;
+
+        foreach ($artists as $artist) {
+            $result[$artist->name][] = $item->track->name;
+        }
+        $result['$total']++;
+    }
+
+    printf("Total number of tracks : %d\n", $result['$total']);
+    printf("Total number of artists : %d\n", count(($result)) - 1);
 }
+
+
+/*
+object(stdClass)#537 (1) {
+      ["track"]=>
+      object(stdClass)#533 (9) {
+        ["name"]=>
+        string(24) "ILS ME RIENT TOUS AU NEZ"
+        ["href"]=>
+        string(56) "https://api.spotify.com/v1/tracks/2oe4ERf40Mx8PWH9gtEfP0"
+        ["track_number"]=>
+        int(8)
+        ["uri"]=>
+        string(36) "spotify:track:2oe4ERf40Mx8PWH9gtEfP0"
+        ["duration_ms"]=>
+        int(147398)
+        ["album"]=>
+        object(stdClass)#534 (2) {
+          ["href"]=>
+          string(56) "https://api.spotify.com/v1/albums/2ywuGcPMEEHP1ZnZ7MMzIi"
+          ["name"]=>
+          string(17) "BAD BOY LOVESTORY"
+        }
+        ["popularity"]=>
+        int(71)
+        ["external_urls"]=>
+        object(stdClass)#535 (1) {
+          ["spotify"]=>
+          string(53) "https://open.spotify.com/track/2oe4ERf40Mx8PWH9gtEfP0"
+        }
+        ["artists"]=>
+        array(1) {
+          [0]=>
+          object(stdClass)#536 (1) {
+            ["name"]=>
+            string(8) "Theodora"
+          }
+        }
+      }
+    }
+*/

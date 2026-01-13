@@ -364,8 +364,8 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
             'fields' => 'items(track(name,href,track_number,uri, popularity, duration_ms, external_urls,album(name,href), artists(name)))'
         ]);
         $ressource = sprintf("/playlists/%s/tracks?%s", $playlist['id'], $query_params_filter_track_data);
-        $tracks = request($ressource, $access_token, method: 'GET', format: 'ROW_JSON');
-        save_playlist_locally($playlist, $tracks, ++$position, count($playlist_to_save));
+        $tracks = request($ressource, $access_token, method: 'GET');
+        save_playlist_locally($playlist, json_encode($tracks['items']), ++$position, count($playlist_to_save));
     }
 }
 
