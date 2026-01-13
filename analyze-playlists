@@ -2,7 +2,7 @@
 <?php
 
 /**
- * This analyses locally saved playlists (artists, genres, etc.) 
+ * This program analyses saved playlists locally and print a report for each of them (artists, genres, etc.) 
  *
  * @package PS\ListeningData
  * @author Paul Schuhmacher
@@ -17,24 +17,20 @@ if (!DEBUG_MODE) {
     });
 }
 
+$files = scandir(BACKUP_DIR);
 
-/*
- Data on playlists (if present on the machine)
-*/
-
-if (!is_dir(BACKUP_DIR)) {
-    echo "Réaliser un backup de vos playlists (avec le programme backup-playlists) pour en extraire des données.";
+//Seulement les fichiers . et ..
+if (count($files) == 2) {
+    echo "Réaliser un backup de vos playlists avant (avec le programme 'backup-playlists')";
     die;
 }
 
-
-$files = scandir(BACKUP_DIR);
-
-if ($files == false)
+if ($files == false) {
+    printf("Impossible de lire le contenu du dossier %s. Le dossier %s n'existe peut-être pas. Réaliser un backup de vos playlists avant (avec le programme 'backup-playlists')\n", BACKUP_DIR, BACKUP_DIR);
     exit;
+}
 
 foreach ($files as $file) {
-
 
     if ($file === '.' || $file == '..' || pathinfo($file, PATHINFO_EXTENSION) != 'json')
         continue;
