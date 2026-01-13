@@ -355,12 +355,13 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
  */
 function backup_liked_tracks(AccessToken $access_token)
 {
-    //Liked tracks list ('Your music') is paginated, 50max
+    //Liked tracks list ('Your music') is paginated, max 50 per page.
+    //@see https://developer.spotify.com/documentation/web-api/reference/get-users-saved-tracks
     $tracks = [];
     $offset = 0;
     $limit = 50;
 
-    printf("Collecting saved tracks :\n");
+    printf("Collecting saved tracks data :\n");
     do {
         $query_params = http_build_query([
             'offset' => $offset,
@@ -373,10 +374,11 @@ function backup_liked_tracks(AccessToken $access_token)
         if (isset($response['items'])) {
             $tracks = array_merge($tracks, $response['items']);
         }
-        $offset += $limit;
 
         printf("%d/%d (%02.1f%%)\n", count($tracks), $response['total'], count($tracks) / $response['total'] * 100);
-    } while (isset($response['next']));
+
+        $offset += $limit;
+    } while (isset($response['next'])); //next paginated page
 
     $playlist = [
         'name' => 'saved_tracks'
