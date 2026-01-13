@@ -1,0 +1,60 @@
+#!/bin/php
+<?php
+
+/**
+ * This analyses locally saved playlists (artists, genres, etc.) 
+ *
+ * @package PS\ListeningData
+ * @author Paul Schuhmacher
+ */
+
+require_once 'config.php';
+require_once 'func.php';
+
+if (!DEBUG_MODE) {
+    set_exception_handler(function (Exception $e) {
+        die($e->getMessage());
+    });
+}
+
+
+/*
+ Data on playlists (if present on the machine)
+*/
+
+if (!is_dir(BACKUP_DIR)) {
+    echo "Réaliser un backup de vos playlists (avec le programme backup-playlists) pour en extraire des données.";
+    die;
+}
+
+
+$files = scandir(BACKUP_DIR);
+
+if ($files == false)
+    exit;
+
+foreach ($files as $file) {
+
+
+    if ($file === '.' || $file == '..' || pathinfo($file, PATHINFO_EXTENSION) != 'json')
+        continue;
+
+    printf("Playlist %s\n", pathinfo($file, PATHINFO_FILENAME));
+
+    $path = sprintf("%s/%s", BACKUP_DIR, $file);
+
+    $content = file_get_contents($path);
+
+    if ($content == false) {
+        echo "Impossible de lire le contenu du fichier %path. Playlist ignoré." . PHP_EOL;
+        continue;
+    }
+
+    $tracks = json_decode($content);
+
+    if ($tracks == null) {
+        echo "Les données sur la playlist ne sont pas dans un format JSON valide. Playlist ignorée." . PHP_EOL;
+        continue;
+    }
+    ddump($tracks);
+}

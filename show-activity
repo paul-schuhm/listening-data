@@ -109,3 +109,4 @@ foreach ($time_ranges as $time_range) {
     }
     printf("\n");
 }
+exit;

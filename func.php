@@ -37,6 +37,24 @@ function dump(mixed ...$data): void
 }
 
 /**
+ * Debugging function : var_dump $data and die script, only in DEBUG_MODE
+ *
+ * @param [type] ...$data
+ * @return void
+ */
+function ddump(mixed ...$data): void
+{
+    if (!defined('DEBUG_MODE') || DEBUG_MODE !== true) {
+        return;
+    }
+
+    foreach ($data as $value) {
+        var_dump($value);
+    }
+    die;
+}
+
+/**
  * Authenticates the user with Spotify and returns a valid access token.
  * If a refresh token is available locally, it is used to obtain a new
  * access token without user interaction. Otherwise, the OAuth
