@@ -18,9 +18,9 @@ if (!DEBUG_MODE) {
     });
 }
 
-/*@see https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks */
 /**
  * Périodes sur lesquelles analyser l'activité d'écoute et établir les tops.
+ * @see https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
  */
 enum TopTimeRange: string
 {
@@ -30,11 +30,10 @@ enum TopTimeRange: string
 }
 
 /**
- * BEGINNING OF THE PROCEDURE
+ * == BEGINNING OF THE PROCEDURE ==
  */
 
 $access_token = connect();
-
 $me = request('/me', $access_token);
 
 if (!isset($me['id'])) {
@@ -43,13 +42,18 @@ if (!isset($me['id'])) {
 
 define('CURRENT_USER_ID', $me['id']);
 
-/*Stats sur quelle(s) période(s)*/
+/*Stats over which period(s)*/
 $time_ranges = [
     /*~ Last 4 weeks*/
     TopTimeRange::Short,
     /*~ Last 1 year*/
     TopTimeRange::Long,
 ];
+
+
+/*
+    TOP TRACKS
+*/
 
 define('RESOURCE_TOP_TRACKS', '/me/top/tracks');
 define('LIMIT_RESULTS_TRACKS', 25);
@@ -77,6 +81,10 @@ foreach ($time_ranges as $time_range) {
     }
     printf("\n");
 }
+
+/*
+    TOP ARTISTS
+*/
 
 define('RESOURCE_TOP_ARTISTS', '/me/top/artists');
 define('LIMIT_RESULTS_ARTISTS', 20);

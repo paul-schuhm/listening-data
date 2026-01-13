@@ -11,7 +11,7 @@ Un client Spotify pour faire un backup des playlists et monitorer l'activité d'
 
 ## Installer les programmes
 
-> Prérequis : installer PHP 8+.
+> Prérequis : [installer PHP 8+](https://www.php.net/downloads.php).
 
 1. **Créez** le fichier de configuration `config.ini` :
 
@@ -20,7 +20,7 @@ Un client Spotify pour faire un backup des playlists et monitorer l'activité d'
     chmod +x backup-playlists show-activity
     ~~~
 
-2. **Renseignez-y** les credentials et données de votre application cliente Spotify.
+2. **Renseignez-y** les *credentials* et données de [votre application cliente Spotify](https://developer.spotify.com/documentation/web-api/concepts/apps).
 
 ## Utiliser
 
@@ -29,6 +29,8 @@ Un client Spotify pour faire un backup des playlists et monitorer l'activité d'
 ~~~bash
 ./backup-playlists
 ~~~
+
+> Sauve vos playlists publiques, privées, collaboratives ou non ainsi que vos titres likés ('Your Music')
 
 ### Afficher l'activité d'écoute (top tracks et artistes) sur différentes périodes
 

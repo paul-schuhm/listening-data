@@ -1,6 +1,6 @@
 <?php
 
-/*Activer/Desactivier le mode debug. Utilisée par la fonction dump().*/
+/*Activer/Désactiver le mode debug. Utilisée par la fonction dump().*/
 define('DEBUG_MODE', true);
 
 //Load data and env variables from a local config.ini file placed at the root of the project
