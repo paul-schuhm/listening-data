@@ -323,14 +323,17 @@ function printf_playlist_data(array $playlist): void
  */
 function backup_playlists(AccessToken $access_token, string $current_user_id, string $which_one = 'ALL')
 {
+
     $playlists = request('/me/playlists', $access_token);
 
-    printf("Total number of playlists : %d\n", intval($playlists['total']));
+    printf("== INFORMATIONS ==\n");
+
+    printf("Total number of playlists (%d)\n", intval($playlists['total']));
+    printf("Playlists to save: \n");
 
     $playlist_to_save = [];
 
     foreach ($playlists['items'] as $playlist) {
-
         $SAVE = false;
 
         switch ($which_one) {
@@ -351,42 +354,23 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
         }
     }
 
-    printf("Playlists to save (%s): %d\n", $which_one, count($playlist_to_save));
+    printf("Number of playlists to save (%s): %d\n", $which_one, count($playlist_to_save));
+
+    printf("\n== PROCESSING ==\n");
 
     $position = 0;
 
     foreach ($playlist_to_save as $playlist) {
-
         printf(
-            "Saving playlist %-30s (n° %2d/%2d, id: %s) ... ",
+            "- Saving playlist %-25s (n°%2d/%2d, id: %s) ... ",
             $playlist['name'],
             $position + 1,
             count($playlist_to_save),
             $playlist['id']
         );
 
-        $tracks = [];
-        $offset = 0;
-        $limit = 50;
-
-        do {
-            //Keep only track metadata i'm interested in
-            //@see https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
-            $query_params = http_build_query([
-                'offset' => $offset,
-                'limit' => $limit,
-                'fields' => 'next, total, items(track(name,href,uri,external_urls,album(name,href),artists(name)))'
-            ]);
-
-            $ressource = sprintf("/playlists/%s/tracks?%s", $playlist['id'], $query_params);
-            $response = request($ressource, $access_token, method: 'GET');
-
-            if (isset($response['items'])) {
-                $tracks = array_merge($tracks, $response['items']);
-            }
-            $offset += $limit;
-        } while (isset($response['next'])); //next paginated page
-
+        $ressource = sprintf("/playlists/%s/tracks", $playlist['id']);
+        $tracks = query_paginated_tracks($ressource, $access_token, 100);
         save_playlist_locally($playlist, json_encode($tracks));
         $position++;
     }
@@ -400,36 +384,49 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
  */
 function backup_liked_tracks(AccessToken $access_token)
 {
-    //Liked tracks list ('Your music') is paginated, max 50 per page.
-    //@see https://developer.spotify.com/documentation/web-api/reference/get-users-saved-tracks
-    $tracks = [];
-    $offset = 0;
-    $limit = 50;
 
+    printf("- Saving playlist 'Your Music' (liked tracks)\n");
     printf("Collecting saved tracks data :\n");
-    do {
-        $query_params = http_build_query([
-            'offset' => $offset,
-            'limit' => $limit,
-            'fields' => 'next, total, items(track(name,href,uri,external_urls,album(name,href),artists(name)))'
-        ]);
 
-        $resource = sprintf("/me/tracks?%s", $query_params);
-        $response = request($resource, $access_token);
-        if (isset($response['items'])) {
-            $tracks = array_merge($tracks, $response['items']);
-        }
-
-        printf("%d/%d (%02.1f%%)\n", count($tracks), $response['total'], count($tracks) / $response['total'] * 100);
-
-        $offset += $limit;
-    } while (isset($response['next'])); //next paginated page
+    $tracks = query_paginated_tracks("/me/tracks", $access_token, 50, show_progress: true);
 
     $playlist = [
         'name' => 'saved_tracks'
     ];
 
     save_playlist_locally($playlist, json_encode($tracks));
+}
+
+
+function query_paginated_tracks(string $resource, AccessToken $access_token, int $limit = 50, bool $show_progress = false)
+{
+    //Liked tracks list ('Your music') is paginated, max 50 per page. Normal playlist is max 100 per page.
+    //@see https://developer.spotify.com/documentation/web-api/reference/get-users-saved-tracks
+    $tracks = [];
+    $offset = 0;
+    do {
+        $query_params = http_build_query([
+            'offset' => $offset,
+            'limit' => $limit,
+            //Keep only track metadata i'm interested in
+            //@see https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
+            'fields' => 'next,total,items(added_at,track(name,href,uri,duration_ms,external_ids,external_urls,album(name,href),artists(name)))'
+        ]);
+
+        $response = request(sprintf("%s?%s", $resource, $query_params), $access_token);
+
+        if (isset($response['items'])) {
+            $tracks = array_merge($tracks, $response['items']);
+        }
+
+        if ($show_progress) {
+            printf("%d/%d (%02.1f%%)\n", count($tracks), $response['total'], count($tracks) / $response['total'] * 100);
+        }
+
+        $offset += $limit;
+    } while (isset($response['next'])); //next page
+
+    return $tracks;
 }
 
 
@@ -444,7 +441,6 @@ function format_2_filename(string $name): string
     $name = trim($name);
     $name = str_replace(" ", "-", $name);
     $name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $name);
-    $name = strip_tags($name);
     $name = strtolower($name);
     return $name;
 }
@@ -468,7 +464,10 @@ function save_playlist_locally(array $playlist, string $tracks): int|bool
         throw new RuntimeException("Impossible de créer $dir. Revoir les permissions sur le path concerné et relancer le programme.");
     }
 
-    //les playlists ont un historique de versions (snapshot), on enregistre donc les playlists dans leur dernier état.
+    /*
+    Les playlists ont un historique de versions (snapshot),
+    on enregistre donc seulement les playlists dans leur dernier état.
+    */
     $file_playlist = sprintf("$dir/%s.json", format_2_filename($playlist['name']));
     $file = fopen($file_playlist, 'w');
     $res = fwrite($file, $tracks);
