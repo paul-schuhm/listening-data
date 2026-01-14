@@ -302,7 +302,6 @@ function printf_playlist_data(array $playlist): void
     }
 
     $width = 33;
-
     $pad = $width - mb_strwidth($playlist['name'], 'UTF-8');
 
     printf(
@@ -361,7 +360,7 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
         //Keep only track metadata i'm interested in
         //@see https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
         $query_params_filter_track_data = http_build_query([
-            'fields' => 'items(track(name,href,track_number,uri, popularity, duration_ms, external_urls,album(name,href), artists(name)))'
+            'fields' => 'items(track(name,href,track_number,uri, popularity, duration_ms, external_urls,album(name,href), artists(name)))',
         ]);
         $ressource = sprintf("/playlists/%s/tracks?%s", $playlist['id'], $query_params_filter_track_data);
         $tracks = request($ressource, $access_token, method: 'GET');
@@ -462,4 +461,12 @@ function save_playlist_locally(array $playlist, string $tracks, ?int $position =
     }
 
     return $res;
+}
+
+
+function ascii_bar(float $frac, int $width = 50): string
+{
+    $size = floor($frac * $width);
+    $bar = str_repeat("\u{2588}", $size);
+    return $bar;
 }

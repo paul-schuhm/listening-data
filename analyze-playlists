@@ -3,6 +3,7 @@
 
 /**
  * This program analyses saved playlists locally and print a report for each of them (artists, genres, etc.) 
+ * Report is printed on STDOUT for easy grep.
  *
  * @package PS\ListeningData
  * @author Paul Schuhmacher
@@ -10,6 +11,10 @@
 
 require_once 'config.php';
 require_once 'func.php';
+
+setlocale(LC_ALL, 'C.UTF-8');
+
+
 
 if (!DEBUG_MODE) {
     set_exception_handler(function (Exception $e) {
@@ -30,12 +35,14 @@ if ($files == false) {
     exit;
 }
 
+//Loop over playlists
 foreach ($files as $file) {
 
     if ($file === '.' || $file == '..' || pathinfo($file, PATHINFO_EXTENSION) != 'json')
         continue;
 
-    printf("Playlist %s\n", pathinfo($file, PATHINFO_FILENAME));
+    $playlist_name = pathinfo($file, PATHINFO_FILENAME);
+
 
     $path = sprintf("%s/%s", BACKUP_DIR, $file);
 
@@ -53,8 +60,8 @@ foreach ($files as $file) {
         continue;
     }
 
+    //Reorganize tracks/artist
     $result = [];
-    $result['$total'] = 0;
 
     foreach ($items as $item) {
 
@@ -63,50 +70,27 @@ foreach ($files as $file) {
         foreach ($artists as $artist) {
             $result[$artist->name][] = $item->track->name;
         }
-        $result['$total']++;
     }
 
-    printf("Total number of tracks : %d\n", $result['$total']);
-    printf("Total number of artists : %d\n", count(($result)) - 1);
+    $nb_of_tracks = count($items);
+
+    printf("* Playlist $playlist_name (%d tracks, %d artists)\n", $nb_of_tracks, count($result));
+
+    //Sort by artists with higher number of tracks (desc)
+    uasort($result, function ($a, $b) {
+        if (count($a) == count($b))
+            return 0;
+        return count($a) < count($b) ? 1 : -1;
+    });
+
+    foreach ($result as $artist_name => $tracks) {
+        $frac = count($tracks) / $nb_of_tracks;
+        if ($frac >= 0.01) {
+            $width = 40;
+            $pad = $width - mb_strwidth($artist_name, 'UTF-8');
+            printf(" %s (%02d)%s (playlist: %s) (%3.0f%%) %s\n", $artist_name, count($tracks), str_repeat(' ', max(0, $pad)), $playlist_name,  $frac * 100,  ascii_bar($frac));
+        }
+    }
+
+    printf("\n");
 }
-
-
-/*
-object(stdClass)#537 (1) {
-      ["track"]=>
-      object(stdClass)#533 (9) {
-        ["name"]=>
-        string(24) "ILS ME RIENT TOUS AU NEZ"
-        ["href"]=>
-        string(56) "https://api.spotify.com/v1/tracks/2oe4ERf40Mx8PWH9gtEfP0"
-        ["track_number"]=>
-        int(8)
-        ["uri"]=>
-        string(36) "spotify:track:2oe4ERf40Mx8PWH9gtEfP0"
-        ["duration_ms"]=>
-        int(147398)
-        ["album"]=>
-        object(stdClass)#534 (2) {
-          ["href"]=>
-          string(56) "https://api.spotify.com/v1/albums/2ywuGcPMEEHP1ZnZ7MMzIi"
-          ["name"]=>
-          string(17) "BAD BOY LOVESTORY"
-        }
-        ["popularity"]=>
-        int(71)
-        ["external_urls"]=>
-        object(stdClass)#535 (1) {
-          ["spotify"]=>
-          string(53) "https://open.spotify.com/track/2oe4ERf40Mx8PWH9gtEfP0"
-        }
-        ["artists"]=>
-        array(1) {
-          [0]=>
-          object(stdClass)#536 (1) {
-            ["name"]=>
-            string(8) "Theodora"
-          }
-        }
-      }
-    }
-*/

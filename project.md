@@ -15,3 +15,4 @@ C'est [**le but du refresh token**](https://developer.spotify.com/documentation/
 - Obtenir les stats d'écoute (*tops* seulement, Spotify ne donne pas beaucoup d'infos... *Business is business*...) [x]
 - Écrire un bot (cron) qui ajoute dans une playlist dédiée des musiques recommandées à partir des infos du profil et de l'activité d'écoute []
 - *Have fun !* [x]
+- **FIX BUG : [Limit à 100 items par défaut](https://developer.spotify.com/documentation/web-api/reference/get-playlist), les résultats sont paginés aussi pour les playlists classiques !** Backup incomplet.)
