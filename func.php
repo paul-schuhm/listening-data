@@ -305,7 +305,7 @@ function printf_playlist_data(array $playlist): void
     $pad = $width - mb_strwidth($playlist['name'], 'UTF-8');
 
     printf(
-        "- playlist: %s%s | Number of tracks: %3d | Owner : %s\n",
+        "- Playlist: %s%s (%3d tracks), owned by %s\n",
         $playlist['name'],
         str_repeat(' ', max(0, $pad)),
         intval($playlist['tracks']['total']),
@@ -357,14 +357,38 @@ function backup_playlists(AccessToken $access_token, string $current_user_id, st
 
     foreach ($playlist_to_save as $playlist) {
 
-        //Keep only track metadata i'm interested in
-        //@see https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
-        $query_params_filter_track_data = http_build_query([
-            'fields' => 'items(track(name,href,track_number,uri, popularity, duration_ms, external_urls,album(name,href), artists(name)))',
-        ]);
-        $ressource = sprintf("/playlists/%s/tracks?%s", $playlist['id'], $query_params_filter_track_data);
-        $tracks = request($ressource, $access_token, method: 'GET');
-        save_playlist_locally($playlist, json_encode($tracks['items']), ++$position, count($playlist_to_save));
+        printf(
+            "Saving playlist %-30s (n° %2d/%2d, id: %s) ... ",
+            $playlist['name'],
+            $position + 1,
+            count($playlist_to_save),
+            $playlist['id']
+        );
+
+        $tracks = [];
+        $offset = 0;
+        $limit = 50;
+
+        do {
+            //Keep only track metadata i'm interested in
+            //@see https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
+            $query_params = http_build_query([
+                'offset' => $offset,
+                'limit' => $limit,
+                'fields' => 'next, total, items(track(name,href,uri,external_urls,album(name,href),artists(name)))'
+            ]);
+
+            $ressource = sprintf("/playlists/%s/tracks?%s", $playlist['id'], $query_params);
+            $response = request($ressource, $access_token, method: 'GET');
+
+            if (isset($response['items'])) {
+                $tracks = array_merge($tracks, $response['items']);
+            }
+            $offset += $limit;
+        } while (isset($response['next'])); //next paginated page
+
+        save_playlist_locally($playlist, json_encode($tracks));
+        $position++;
     }
 }
 
@@ -431,11 +455,9 @@ function format_2_filename(string $name): string
  *
  * @param array $playlist Playlist to save. Key 'name' required
  * @param string $tracks List of tracks (JSON format)
- * @param null|integer $position. Optional. Position of the playlist in the playlist queue
- * @param null|integer $total. Optional. Total number of playlists in the queue
  * @return integer|boolean
  */
-function save_playlist_locally(array $playlist, string $tracks, ?int $position = null, ?int $total = null): int|bool
+function save_playlist_locally(array $playlist, string $tracks): int|bool
 {
     if (!defined('BACKUP_DIR')) {
         throw new RuntimeException("La valeur BACKUP_DIR (PATH où sauver les playlists) n'est pas défini. Le définir est relancer le programme.");
@@ -453,18 +475,14 @@ function save_playlist_locally(array $playlist, string $tracks, ?int $position =
     fclose($file);
 
     if ($res != false) {
-        if ($position == null || $total == null) {
-            printf("Playlist %s saved\n", $playlist['name']);
-        } else {
-            printf(" - (%d/%d) Playlist %s saved\n", $position, $total, $playlist['name']);
-        }
+        printf("Playlist %s saved.\n", $playlist['name']);
     }
 
     return $res;
 }
 
 
-function ascii_bar(float $frac, int $width = 50): string
+function ascii_bar(float $frac, int $width = 80): string
 {
     $size = floor($frac * $width);
     $bar = str_repeat("\u{2588}", $size);

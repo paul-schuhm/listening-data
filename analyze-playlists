@@ -65,6 +65,10 @@ foreach ($files as $file) {
 
     foreach ($items as $item) {
 
+        if (!isset($item->track)) {
+            continue;
+        }
+
         $artists = $item->track->artists;
 
         foreach ($artists as $artist) {
@@ -85,10 +89,10 @@ foreach ($files as $file) {
 
     foreach ($result as $artist_name => $tracks) {
         $frac = count($tracks) / $nb_of_tracks;
-        if ($frac >= 0.01) {
+        if ($frac >= 0.015) {
             $width = 40;
             $pad = $width - mb_strwidth($artist_name, 'UTF-8');
-            printf(" %s (%02d)%s (playlist: %s) (%3.0f%%) %s\n", $artist_name, count($tracks), str_repeat(' ', max(0, $pad)), $playlist_name,  $frac * 100,  ascii_bar($frac));
+            printf(" %s (%2d)%s (playlist: %s) (%3.0f%%) %s\n", $artist_name, count($tracks), str_repeat(' ', max(0, $pad)), $playlist_name,  $frac * 100,  ascii_bar($frac));
         }
     }
 
