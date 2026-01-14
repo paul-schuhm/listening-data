@@ -31,4 +31,4 @@ define('CURRENT_USER_ID', $me['id']);
 printf("Account: %s (id: %s)\n", $me['display_name'], CURRENT_USER_ID);
 
 backup_playlists($access_token, CURRENT_USER_ID, 'OWNED_ONLY');
-//backup_liked_tracks($access_token);
+backup_liked_tracks($access_token);
