@@ -1,12 +1,13 @@
 # Listening Data (Spotify)
 
-Un client Spotify pour faire un backup des playlists et monitorer l'activité d'écoute.
+Un client Spotify pour faire un backup des playlists, monitorer l'activité d'écoute (tops) et analyser le contenu des playlists.
 
 - [Listening Data (Spotify)](#listening-data-spotify)
   - [Installer les programmes](#installer-les-programmes)
   - [Utiliser](#utiliser)
     - [Réaliser un backup de vos playlists](#réaliser-un-backup-de-vos-playlists)
     - [Afficher l'activité d'écoute (top tracks et artistes) sur différentes périodes](#afficher-lactivité-découte-top-tracks-et-artistes-sur-différentes-périodes)
+    - [Analyser le contenu des playlists sauvegardées (artistes, etc.)](#analyser-le-contenu-des-playlists-sauvegardées-artistes-etc)
   - [Références utiles](#références-utiles)
 
 ## Installer les programmes
@@ -23,7 +24,7 @@ Un client Spotify pour faire un backup des playlists et monitorer l'activité d'
 3. Rendre les programmes **exécutables** :
 
     ~~~bash
-    chmod +x backup-playlists show-activity
+    chmod +x backup-playlists show-activity analyze-playlists
     ~~~
 
 ## Utiliser
@@ -40,6 +41,12 @@ Un client Spotify pour faire un backup des playlists et monitorer l'activité d'
 
 ~~~bash
 ./show-activity
+~~~
+
+### Analyser le contenu des playlists sauvegardées (artistes, etc.)
+
+~~~bash
+./analyze-playlists
 ~~~
 
 ## Références utiles
