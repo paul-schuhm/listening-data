@@ -179,8 +179,6 @@ function request_access_token(string $code): AccessToken
 
     $response = json_decode($response, true);
 
-    dump($response);
-
     return new AccessToken(
         $response['access_token'],
         $response['token_type'],
@@ -456,7 +454,7 @@ function format_2_filename(string $name): string
 function save_playlist_locally(array $playlist, string $tracks): int|bool
 {
     if (!defined('BACKUP_DIR')) {
-        throw new RuntimeException("La valeur BACKUP_DIR (PATH où sauver les playlists) n'est pas défini. Le définir est relancer le programme.");
+        throw new RuntimeException("La valeur BACKUP_DIR (PATH où sauver les playlists) n'est pas défini. Le définir puis relancer le programme.");
     }
     $dir = BACKUP_DIR;
 
