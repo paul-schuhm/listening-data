@@ -115,8 +115,13 @@ function ask_for_auth(): string
     exec("xdg-open '$auth_url' >/dev/null 2>&1");
 
     //Handle redirect URI from the browser by opening a socket
-    $socket = stream_socket_server('tcp://' . REDIRECT_URI, $errno, $errstr);
+    $socket_addr = str_replace(['http://', 'https://'], '', REDIRECT_URI);
+    $socket = stream_socket_server('tcp://' . $socket_addr, $errno, $errstr);
     $connexion = stream_socket_accept($socket);
+
+    if(false === $connexion){
+      throw new RuntimeException('Connection not accepted');
+    }
 
     $request = fread($connexion, 1024);
 
